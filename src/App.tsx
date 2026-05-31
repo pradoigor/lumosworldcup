@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Settings } from 'lucide-react';
 import { getAllScores, saveScore } from './db';
 import {
   competitionName,
@@ -25,6 +26,7 @@ type Filters = {
 };
 
 type Phase = 'all' | 'groups' | 'playoffs' | 'bracket';
+type Theme = 'light' | 'dark';
 
 const timeZones = [
   { value: 'match-local', label: 'Horário do estádio' },
@@ -56,7 +58,9 @@ export default function App() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [phase, setPhase] = useState<Phase>('all');
   const [page, setPage] = useState(1);
-  const [timeZone, setTimeZone] = useState('match-local');
+  const [timeZone, setTimeZone] = useState(() => getInitialTimeZone());
+  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [savedMatchId, setSavedMatchId] = useState<string | null>(null);
   const [isLoadingScores, setIsLoadingScores] = useState(true);
 
@@ -92,6 +96,15 @@ export default function App() {
     const timeout = window.setTimeout(() => setSavedMatchId(null), 1600);
     return () => window.clearTimeout(timeout);
   }, [savedMatchId]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('lumosworldcup-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem('lumosworldcup-time-zone', timeZone);
+  }, [timeZone]);
 
   const groups = useMemo(() => getGroups(matches), []);
   const dates = useMemo(() => getDates(matches), []);
@@ -138,6 +151,10 @@ export default function App() {
     setPhase(nextPhase);
   }
 
+  function clearFilters() {
+    setFilters(emptyFilters);
+  }
+
   function updateDraft(matchId: string, field: keyof ScoreDraft, value: string) {
     if (!isValidScoreInput(value)) {
       return;
@@ -174,13 +191,51 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <div className="main-panel">
+        <div>
           <p className="eyebrow">Palpites</p>
           <h1>{competitionName}</h1>
         </div>
-        <div className="summary">
-          <strong>{phase === 'bracket' ? bracketRounds.flatMap((round) => round.matches).length : filteredMatches.length}</strong>
-          <span>{filteredMatches.length === 1 ? 'jogo' : 'jogos'}</span>
+        <div className="header-actions">
+          <div className="settings">
+            <button
+              aria-expanded={isSettingsOpen}
+              aria-label="Configurações"
+              className="icon-button"
+              type="button"
+              onClick={() => setIsSettingsOpen((isOpen) => !isOpen)}
+            >
+              <Settings aria-hidden="true" size={18} strokeWidth={2.4} />
+            </button>
+            {isSettingsOpen ? (
+              <div className="settings-menu">
+                <label>
+                  <span>Horário padrão</span>
+                  <select value={timeZone} onChange={(event) => setTimeZone(event.target.value)}>
+                    {timeZones.map((zone) => (
+                      <option key={zone.value} value={zone.value}>
+                        {zone.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => setTheme((currentTheme) => (currentTheme === 'light' ? 'dark' : 'light'))}
+                >
+                  {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <div className="summary">
+            <strong>
+              {phase === 'bracket'
+                ? bracketRounds.flatMap((round) => round.matches).length
+                : filteredMatches.length}
+            </strong>
+            <span>{filteredMatches.length === 1 ? 'jogo' : 'jogos'}</span>
+          </div>
         </div>
       </header>
 
@@ -232,20 +287,13 @@ export default function App() {
               </select>
             </label>
 
-            <label>
-              <span>Horário</span>
-              <select value={timeZone} onChange={(event) => setTimeZone(event.target.value)}>
-                {timeZones.map((zone) => (
-                  <option key={zone.value} value={zone.value}>
-                    {zone.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <button className="secondary-button" disabled={!hasFilters} type="button" onClick={clearFilters}>
+              Limpar filtros
+            </button>
           </section>
         </aside>
 
-        <div>
+        <div className="main-panel">
           {isLoadingScores ? <p className="status-line">Carregando palpites salvos...</p> : null}
 
           {phase === 'bracket' ? (
@@ -416,6 +464,21 @@ function isValidScoreInput(value: string) {
 
 function parseScoreValue(value: string) {
   return value === '' ? null : Number(value);
+}
+
+function getInitialTheme(): Theme {
+  const storedTheme = window.localStorage.getItem('lumosworldcup-theme');
+
+  if (storedTheme === 'light' || storedTheme === 'dark') {
+    return storedTheme;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getInitialTimeZone() {
+  const storedTimeZone = window.localStorage.getItem('lumosworldcup-time-zone');
+  return timeZones.some((zone) => zone.value === storedTimeZone) ? storedTimeZone! : 'match-local';
 }
 
 function TeamName({ team }: { team: string }) {

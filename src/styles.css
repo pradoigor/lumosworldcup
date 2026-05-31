@@ -1,6 +1,19 @@
 :root {
-  color: #172126;
-  background: #f4f1ea;
+  color: var(--text);
+  background: var(--page);
+  --page: #f4f1ea;
+  --surface: #ffffff;
+  --surface-muted: #fbfaf7;
+  --text: #172126;
+  --muted: #61706a;
+  --border: #ded7ca;
+  --border-strong: #cfc7b9;
+  --accent: #176b57;
+  --accent-hover: #115443;
+  --on-accent: #ffffff;
+  --secondary: #e8e1d4;
+  --secondary-hover: #d9cfbf;
+  --warm: #8f7f65;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -9,11 +22,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root[data-theme="dark"] {
+  --page: #111815;
+  --surface: #1b2722;
+  --surface-muted: #16211d;
+  --text: #edf4ef;
+  --muted: #a7b9b0;
+  --border: #31443b;
+  --border-strong: #4a6056;
+  --accent: #45a786;
+  --accent-hover: #5cbd9c;
+  --on-accent: #0c1512;
+  --secondary: #293a33;
+  --secondary-hover: #354a41;
+  --warm: #cab98f;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
+  background: var(--page);
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
@@ -28,8 +58,8 @@ select {
 button {
   border: 0;
   border-radius: 8px;
-  background: #176b57;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--on-accent);
   cursor: pointer;
   font-weight: 700;
   min-height: 42px;
@@ -37,7 +67,7 @@ button {
 }
 
 button:hover {
-  background: #115443;
+  background: var(--accent-hover);
 }
 
 button:disabled {
@@ -59,8 +89,57 @@ button:disabled {
   margin-bottom: 24px;
 }
 
+.header-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.settings {
+  position: relative;
+}
+
+.icon-button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0;
+}
+
+.icon-button svg {
+  display: block;
+}
+
+.settings-menu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgb(23 33 38 / 18%);
+  display: grid;
+  gap: 12px;
+  min-width: 240px;
+  padding: 14px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+}
+
+.settings-menu label {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-menu span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .eyebrow {
-  color: #176b57;
+  color: var(--accent);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -76,23 +155,23 @@ h1 {
 
 .summary {
   align-items: center;
-  background: #ffffff;
-  border: 1px solid #ded7ca;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: grid;
   justify-items: center;
-  min-width: 116px;
-  padding: 14px 18px;
+  min-width: 86px;
+  padding: 8px 14px;
 }
 
 .summary strong {
-  font-size: 1.8rem;
+  font-size: 1.35rem;
   line-height: 1;
 }
 
 .summary span {
-  color: #61706a;
-  font-size: 0.88rem;
+  color: var(--muted);
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
@@ -122,8 +201,8 @@ h1 {
 }
 
 .phase-tabs {
-  background: #ffffff;
-  border: 1px solid #ded7ca;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: grid;
   gap: 6px;
@@ -132,7 +211,7 @@ h1 {
 
 .phase-tabs button {
   background: transparent;
-  color: #61706a;
+  color: var(--muted);
   justify-content: flex-start;
   min-height: 40px;
   padding: 0 12px;
@@ -141,13 +220,13 @@ h1 {
 
 .phase-tabs button:hover,
 .phase-tabs button.active {
-  background: #176b57;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .filters {
-  background: #ffffff;
-  border: 1px solid #ded7ca;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: grid;
   gap: 16px;
@@ -161,17 +240,17 @@ h1 {
 }
 
 .filters span {
-  color: #61706a;
+  color: var(--muted);
   font-size: 0.82rem;
   font-weight: 800;
 }
 
 select,
 input {
-  background: #fbfaf7;
-  border: 1px solid #cfc7b9;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  color: #172126;
+  color: var(--text);
   min-height: 42px;
 }
 
@@ -193,22 +272,31 @@ input[type="date"] {
 
 .date-filter {
   display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  grid-template-columns: 1fr;
 }
 
 .date-filter button {
-  background: #e8e1d4;
-  color: #172126;
-  min-width: 78px;
+  background: var(--secondary);
+  color: var(--text);
+  width: 100%;
 }
 
 .date-filter button:hover {
-  background: #d9cfbf;
+  background: var(--secondary-hover);
+}
+
+.secondary-button {
+  background: var(--secondary);
+  color: var(--text);
+}
+
+.secondary-button:hover {
+  background: var(--secondary-hover);
 }
 
 .status-line {
-  color: #61706a;
+  color: var(--muted);
   margin: 14px 0;
 }
 
@@ -218,8 +306,8 @@ input[type="date"] {
 }
 
 .match-card {
-  background: #ffffff;
-  border: 1px solid #ded7ca;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
 }
@@ -227,7 +315,7 @@ input[type="date"] {
 .match-meta,
 .match-footer {
   align-items: center;
-  color: #61706a;
+  color: var(--muted);
   display: flex;
   flex-wrap: wrap;
   font-size: 0.9rem;
@@ -280,12 +368,12 @@ input[type="date"] {
 }
 
 .versus {
-  color: #8f7f65;
+  color: var(--warm);
   font-weight: 900;
 }
 
 .match-footer {
-  border-top: 1px solid #eee8dd;
+  border-top: 1px solid var(--border);
   justify-content: space-between;
   padding-top: 14px;
 }
@@ -299,7 +387,7 @@ input[type="date"] {
 }
 
 .pagination span {
-  color: #61706a;
+  color: var(--muted);
   font-weight: 800;
 }
 
@@ -319,7 +407,7 @@ input[type="date"] {
 }
 
 .bracket-round h2 {
-  color: #172126;
+  color: var(--text);
   font-size: 0.92rem;
   margin: 0;
 }
@@ -332,8 +420,8 @@ input[type="date"] {
 
 .bracket-card {
   align-items: center;
-  background: #ffffff;
-  border: 1px solid #ded7ca;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   display: grid;
   gap: 8px;
@@ -353,7 +441,7 @@ input[type="date"] {
 }
 
 .bracket-versus {
-  color: #8f7f65;
+  color: var(--warm);
   font-weight: 900;
 }
 
